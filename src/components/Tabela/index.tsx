@@ -48,7 +48,7 @@ export function Tabela(props: TabelaProps) {
   const [value, setValue] = useState(globalFilter);
   const onChange = useAsyncDebounce(value => {
     setGlobalFilter(value || undefined)
-  }, 200)
+  }, 200);
 
   return (
     <Col md={12}>
