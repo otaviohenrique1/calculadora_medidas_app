@@ -116,6 +116,9 @@ export function HomePage() {
             initialValues={valoresIniciais}
             onSubmit={onSubmit}
             validationSchema={schemaValidacao}
+            onReset={() => {
+              setResultadoExpressao('');
+            }}
           >
             {({ touched, errors, values }) => (
               <FormFormik>
