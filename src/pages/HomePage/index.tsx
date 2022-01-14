@@ -105,6 +105,10 @@ export function HomePage() {
     formikHelpers.setValues({ nome, campoA: values.campoA, campoB: '', campoC: values.campoC });
   }
 
+  function onReset() {
+    setResultadoExpressao('');
+  }
+
   return (
     <Container className="mb-5 mt-5">
       <Row>
@@ -116,9 +120,6 @@ export function HomePage() {
             initialValues={valoresIniciais}
             onSubmit={onSubmit}
             validationSchema={schemaValidacao}
-            onReset={() => {
-              setResultadoExpressao('');
-            }}
           >
             {({ touched, errors, values }) => (
               <FormFormik>
@@ -134,7 +135,7 @@ export function HomePage() {
                   <Col md={12} className="d-flex justify-content-end">
                     <ButtonGroup>
                       <Button type="submit" color="primary">Calcular</Button>
-                      <Button type="reset" color="danger">Limpar</Button>
+                      <Button type="reset" color="danger" onClick={onReset}>Limpar</Button>
                     </ButtonGroup>
                   </Col>
                 </Row>
