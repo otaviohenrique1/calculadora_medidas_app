@@ -148,7 +148,7 @@ export function HomePage() {
     <Container className="mb-5 mt-5">
       <Row>
         <Col md={12}>
-          <h1 className="w-100 text-center">Calculadora de Medidas</h1>
+          <Titulo texto='Calculadora de Medidas' />
         </Col>
         <Col md={12} className="border-bottom border-top pb-3 pt-3">
           <Formulario onSubmit={onSubmit} onReset={onReset} />
@@ -184,6 +184,16 @@ export function HomePage() {
         </Col>
       </Row>
     </Container>
+  );
+}
+
+interface TituloProps {
+  texto: string;
+}
+
+export function Titulo(props: TituloProps) {
+  return (
+    <h1 className="w-100 text-center">{props.texto}</h1>
   );
 }
 
