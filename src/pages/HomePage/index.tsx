@@ -20,9 +20,19 @@ const schemaValidacao = Yup.object().shape({
   campoC: Yup.string().required("Campo vazio"),
 });
 
+const dataExibicaoModalValoresIniciais: DataTypes = {
+  nome: "",
+  campo_a: "",
+  campo_b: "",
+  campo_c: "",
+  resultado: "",
+  expressao: ""
+};
+
 export function HomePage() {
   const [dataResultadoExpressao, setResultadoExpressao] = useState<string>('');
   const [dataLista, setDataLista] = useState<DataTypes[]>([]);
+  const [dataExibicaoModal, setDataExibicaoModal] = useState<DataTypes>(dataExibicaoModalValoresIniciais);
 
   const { getTableProps, getTableBodyProps, headerGroups, page, prepareRow, setGlobalFilter,
     canPreviousPage, canNextPage, pageOptions, pageCount, gotoPage, nextPage, previousPage,
@@ -33,11 +43,11 @@ export function HomePage() {
         id: 'medidas',
         hideHeader: false,
         columns: [
-          { Header: 'Nome', accessor: 'nome' },
-          { Header: 'Campo A', accessor: 'campo_a' },
-          { Header: 'Campo B', accessor: 'campo_b' },
-          { Header: 'Campo C', accessor: 'campo_c' },
-          { Header: 'Resultado', accessor: 'resultado' },
+          { Header: 'Nome', accessor: 'nome', id: 'nome' },
+          { Header: 'Campo A', accessor: 'campo_a', id: 'campo_a' },
+          { Header: 'Campo B', accessor: 'campo_b', id: 'campo_b' },
+          { Header: 'Campo C', accessor: 'campo_c', id: 'campo_c' },
+          { Header: 'Resultado', accessor: 'resultado', id: 'resultado' },
           {
             Header: () => null,
             id: 'menu_item',
@@ -49,17 +59,47 @@ export function HomePage() {
                 <DropdownMenu>
                   <DropdownItem
                     onClick={() => {
+                      setDataExibicaoModal({
+                        nome: 'A1',
+                        campo_a: '200',
+                        campo_b: '10',
+                        campo_c: '168',
+                        resultado: '8.40',
+                        expressao: 'A1 -> 10 -> 8.40 -> 8.00',
+                      });
+
                       SwalModal.fire({
                         title: <h3>Exibir</h3>,
-                        confirmButtonText: 'Fechar'
-                      });
+                        confirmButtonText: 'Fechar',
+                        buttonsStyling: false,
+                        customClass: {
+                          confirmButton: 'btn btn-primary',
+                        },
+                        html: <div>
+                          <ul>
+                            <li>Nome: {dataExibicaoModal.nome}</li>
+                            <li>Campo A: {dataExibicaoModal.campo_a}</li>
+                            <li>Campo B: {dataExibicaoModal.campo_b}</li>
+                            <li>Campo C: {dataExibicaoModal.campo_c}</li>
+                            <li>Resultado: {dataExibicaoModal.resultado}</li>
+                            <li>Expressao: {dataExibicaoModal.expressao}</li>
+                          </ul>
+                        </div>,
+                      }).then(() => { });
                     }}
                   >Exibir</DropdownItem>
                   <DropdownItem
                     onClick={() => {
                       SwalModal.fire({
                         title: <h3>Expressão</h3>,
-                        confirmButtonText: 'Fechar'
+                        confirmButtonText: 'Fechar',
+                        buttonsStyling: false,
+                        html: (<div>
+                          <h6>A: {cell.row.index}</h6>
+                        </div>),
+                        customClass: {
+                          confirmButton: 'btn btn-primary',
+                        },
                       });
                     }}
                   >Expressão</DropdownItem>
@@ -67,7 +107,18 @@ export function HomePage() {
                     onClick={() => {
                       SwalModal.fire({
                         title: <h3>Excluir</h3>,
-                        confirmButtonText: 'Fechar'
+                        buttonsStyling: false,
+                        customClass: {
+                          confirmButton: 'btn btn-primary me-1',
+                          cancelButton: 'btn btn-danger',
+                        },
+                        confirmButtonText: 'Sim',
+                        showCancelButton: true,
+                        cancelButtonText: 'Não',
+                      }).then(() => {
+                        let id = cell.row.index;
+                        dataLista.splice(id, 1);
+                        setDataLista([...dataLista]);
                       });
                     }}
                   >Excluir</DropdownItem>
@@ -76,7 +127,7 @@ export function HomePage() {
             )
           },
         ],
-      },], []), data: dataLista, initialState: { pageIndex: 0 },
+      },], [dataExibicaoModal.campo_a, dataExibicaoModal.campo_b, dataExibicaoModal.campo_c, dataExibicaoModal.expressao, dataExibicaoModal.nome, dataExibicaoModal.resultado, dataLista]), data: dataLista, initialState: { pageIndex: 0 },
     }, useGlobalFilter, useSortBy, usePagination);
 
   const [value, setValue] = useState(globalFilter);

@@ -1,4 +1,5 @@
 export interface DataTypes {
+  // id: string,
   nome: string;
   campo_a: string;
   campo_b: string;
