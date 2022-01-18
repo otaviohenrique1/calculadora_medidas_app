@@ -1,6 +1,6 @@
 import { Formik, Form as FormFormik, FormikHelpers } from "formik";
 import { useMemo, useState } from "react";
-import { Button, ButtonGroup, Col, Container, DropdownItem, DropdownMenu, DropdownToggle, Form, Input, InputGroup, InputGroupText, Label, Pagination, PaginationItem, PaginationLink, Row, Table, UncontrolledButtonDropdown } from "reactstrap";
+import { Button, ButtonGroup, Col, Container, DropdownItem, DropdownMenu, DropdownToggle, Form, Input, InputGroup, InputGroupText, Label, ListGroup, ListGroupItem, Pagination, PaginationItem, PaginationLink, Row, Table, UncontrolledButtonDropdown } from "reactstrap";
 import { DataTypes, FormTypes, valoresIniciais } from "../../types/types";
 import { calcula_medida, formatador_final } from "../../utils/calculadora";
 import styled from "styled-components";
@@ -20,19 +20,9 @@ const schemaValidacao = Yup.object().shape({
   campoC: Yup.string().required("Campo vazio"),
 });
 
-const dataExibicaoModalValoresIniciais: DataTypes = {
-  nome: "",
-  campo_a: "",
-  campo_b: "",
-  campo_c: "",
-  resultado: "",
-  expressao: ""
-};
-
 export function HomePage() {
   const [dataResultadoExpressao, setResultadoExpressao] = useState<string>('');
   const [dataLista, setDataLista] = useState<DataTypes[]>([]);
-  const [dataExibicaoModal, setDataExibicaoModal] = useState<DataTypes>(dataExibicaoModalValoresIniciais);
 
   const { getTableProps, getTableBodyProps, headerGroups, page, prepareRow, setGlobalFilter,
     canPreviousPage, canNextPage, pageOptions, pageCount, gotoPage, nextPage, previousPage,
@@ -51,83 +41,95 @@ export function HomePage() {
           {
             Header: () => null,
             id: 'menu_item',
-            Cell: (cell) => (
-              <UncontrolledButtonDropdownEstilizado>
-                <DropdownToggle caret className="caret-off d-flex justify-content-center align-items-center w-50 btn-success">
-                  <BsFillGearFill size={20} />
-                </DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem
-                    onClick={() => {
-                      setDataExibicaoModal({
-                        nome: 'A1',
-                        campo_a: '200',
-                        campo_b: '10',
-                        campo_c: '168',
-                        resultado: '8.40',
-                        expressao: 'A1 -> 10 -> 8.40 -> 8.00',
-                      });
+            Cell: (cell) => {
+              let nome = cell.row.values['nome'];
+              let campo_a = cell.row.values['campo_a'];
+              let campo_b = cell.row.values['campo_b'];
+              let campo_c = cell.row.values['campo_c'];
+              let resultado = calcula_medida({
+                campo_a: parseFloat(campo_a),
+                campo_b: parseFloat(campo_b),
+                campo_c: parseFloat(campo_c)
+              });
+              let expressao = formatador_final({ nome, campo_b: parseFloat(campo_b), resultado });
 
-                      SwalModal.fire({
-                        title: <h3>Exibir</h3>,
-                        confirmButtonText: 'Fechar',
-                        buttonsStyling: false,
-                        customClass: {
-                          confirmButton: 'btn btn-primary',
-                        },
-                        html: <div>
-                          <ul>
-                            <li>Nome: {dataExibicaoModal.nome}</li>
-                            <li>Campo A: {dataExibicaoModal.campo_a}</li>
-                            <li>Campo B: {dataExibicaoModal.campo_b}</li>
-                            <li>Campo C: {dataExibicaoModal.campo_c}</li>
-                            <li>Resultado: {dataExibicaoModal.resultado}</li>
-                            <li>Expressao: {dataExibicaoModal.expressao}</li>
-                          </ul>
-                        </div>,
-                      }).then(() => { });
-                    }}
-                  >Exibir</DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      SwalModal.fire({
-                        title: <h3>Expressão</h3>,
-                        confirmButtonText: 'Fechar',
-                        buttonsStyling: false,
-                        html: (<div>
-                          <h6>A: {cell.row.index}</h6>
-                        </div>),
-                        customClass: {
-                          confirmButton: 'btn btn-primary',
-                        },
-                      });
-                    }}
-                  >Expressão</DropdownItem>
-                  <DropdownItem
-                    onClick={() => {
-                      SwalModal.fire({
-                        title: <h3>Excluir</h3>,
-                        buttonsStyling: false,
-                        customClass: {
-                          confirmButton: 'btn btn-primary me-1',
-                          cancelButton: 'btn btn-danger',
-                        },
-                        confirmButtonText: 'Sim',
-                        showCancelButton: true,
-                        cancelButtonText: 'Não',
-                      }).then(() => {
-                        let id = cell.row.index;
-                        dataLista.splice(id, 1);
-                        setDataLista([...dataLista]);
-                      });
-                    }}
-                  >Excluir</DropdownItem>
-                </DropdownMenu>
-              </UncontrolledButtonDropdownEstilizado>
-            )
+              return (
+                <UncontrolledButtonDropdownEstilizado>
+                  <DropdownToggle caret className="caret-off d-flex justify-content-center align-items-center w-50 btn-success">
+                    <BsFillGearFill size={20} />
+                  </DropdownToggle>
+                  <DropdownMenu>
+                    <DropdownItem
+                      onClick={() => {
+                        SwalModal.fire({
+                          title: <h3>Exibir</h3>,
+                          confirmButtonText: 'Fechar',
+                          buttonsStyling: false,
+                          customClass: {
+                            confirmButton: 'btn btn-primary',
+                          },
+                          html: <ListGroup>
+                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
+                              <span className="fw-bold">Nome:</span><span>{nome}</span>
+                            </ListGroupItem>
+                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
+                              <span className="fw-bold">Campo A:</span><span>{campo_a}</span>
+                            </ListGroupItem>
+                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
+                              <span className="fw-bold">Campo B:</span><span>{campo_b}</span>
+                            </ListGroupItem>
+                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
+                              <span className="fw-bold">Campo C:</span><span>{campo_c}</span>
+                            </ListGroupItem>
+                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
+                              <span className="fw-bold">Resultado:</span><span>{resultado}</span>
+                            </ListGroupItem>
+                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
+                              <span className="fw-bold">Expressao:</span><span>{expressao}</span>
+                            </ListGroupItem>
+                          </ListGroup>,
+                        }).then(() => { });
+                      }}
+                    >Exibir</DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        SwalModal.fire({
+                          title: <h3>Expressão</h3>,
+                          confirmButtonText: 'Fechar',
+                          buttonsStyling: false,
+                          html: <h6>{expressao}</h6>,
+                          customClass: {
+                            confirmButton: 'btn btn-primary',
+                          },
+                        });
+                      }}
+                    >Expressão</DropdownItem>
+                    <DropdownItem
+                      onClick={() => {
+                        SwalModal.fire({
+                          title: <h3>Excluir</h3>,
+                          buttonsStyling: false,
+                          customClass: {
+                            confirmButton: 'btn btn-primary me-1',
+                            cancelButton: 'btn btn-danger',
+                          },
+                          confirmButtonText: 'Sim',
+                          showCancelButton: true,
+                          cancelButtonText: 'Não',
+                        }).then(() => {
+                          let id = cell.row.index;
+                          dataLista.splice(id, 1);
+                          setDataLista([...dataLista]);
+                        });
+                      }}
+                    >Excluir</DropdownItem>
+                  </DropdownMenu>
+                </UncontrolledButtonDropdownEstilizado>
+              );
+            }
           },
         ],
-      },], [dataExibicaoModal.campo_a, dataExibicaoModal.campo_b, dataExibicaoModal.campo_c, dataExibicaoModal.expressao, dataExibicaoModal.nome, dataExibicaoModal.resultado, dataLista]), data: dataLista, initialState: { pageIndex: 0 },
+      },], [dataLista]), data: dataLista, initialState: { pageIndex: 0 },
     }, useGlobalFilter, useSortBy, usePagination);
 
   const [value, setValue] = useState(globalFilter);
