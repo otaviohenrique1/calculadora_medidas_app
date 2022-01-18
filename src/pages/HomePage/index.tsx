@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Col, Container, DropdownItem, DropdownMenu, Dropdo
 import { DataTypes, FormTypes, valoresIniciais } from "../../types/types";
 import { calcula_medida, formatador_final } from "../../utils/calculadora";
 import styled from "styled-components";
-import { useAsyncDebounce, useGlobalFilter, usePagination, useSortBy, useTable } from "react-table";
+import { HeaderGroup, TableBodyPropGetter, TableBodyProps, TablePropGetter, TableProps, useAsyncDebounce, useGlobalFilter, usePagination, useSortBy, useTable, Row as RowReactTable } from "react-table";
 import { BsFillGearFill } from "react-icons/bs";
 import { FaSearch, FaSortDown, FaSortUp } from "react-icons/fa";
 import { Campo } from "../../components/Campo";
@@ -43,15 +43,20 @@ export function HomePage() {
             id: 'menu_item',
             Cell: (cell) => {
               let nome = cell.row.values['nome'];
-              let campo_a = cell.row.values['campo_a'];
-              let campo_b = cell.row.values['campo_b'];
-              let campo_c = cell.row.values['campo_c'];
-              let resultado = calcula_medida({
-                campo_a: parseFloat(campo_a),
-                campo_b: parseFloat(campo_b),
-                campo_c: parseFloat(campo_c)
-              });
-              let expressao = formatador_final({ nome, campo_b: parseFloat(campo_b), resultado });
+              let campo_a = parseFloat(cell.row.values['campo_a']);
+              let campo_b = parseFloat(cell.row.values['campo_b']);
+              let campo_c = parseFloat(cell.row.values['campo_c']);
+              let resultado = calcula_medida({ campo_a, campo_b, campo_c });
+              let expressao = formatador_final({ nome, campo_b, resultado });
+
+              let listaDataModal = [
+                { label: 'Nome:', valor: nome },
+                { label: 'Campo A:', valor: campo_a },
+                { label: 'Campo B:', valor: campo_b },
+                { label: 'Campo C:', valor: campo_c },
+                { label: 'Resultado:', valor: resultado },
+                { label: 'Expressao:', valor: expressao }
+              ];
 
               return (
                 <UncontrolledButtonDropdownEstilizado>
@@ -63,44 +68,21 @@ export function HomePage() {
                       onClick={() => {
                         SwalModal.fire({
                           title: <h3>Exibir</h3>,
-                          confirmButtonText: 'Fechar',
                           buttonsStyling: false,
-                          customClass: {
-                            confirmButton: 'btn btn-primary',
-                          },
-                          html: <ListGroup>
-                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
-                              <span className="fw-bold">Nome:</span><span>{nome}</span>
-                            </ListGroupItem>
-                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
-                              <span className="fw-bold">Campo A:</span><span>{campo_a}</span>
-                            </ListGroupItem>
-                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
-                              <span className="fw-bold">Campo B:</span><span>{campo_b}</span>
-                            </ListGroupItem>
-                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
-                              <span className="fw-bold">Campo C:</span><span>{campo_c}</span>
-                            </ListGroupItem>
-                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
-                              <span className="fw-bold">Resultado:</span><span>{resultado}</span>
-                            </ListGroupItem>
-                            <ListGroupItem className="d-flex justify-content-between align-content-center flex-row">
-                              <span className="fw-bold">Expressao:</span><span>{expressao}</span>
-                            </ListGroupItem>
-                          </ListGroup>,
-                        }).then(() => { });
+                          confirmButtonText: 'Fechar',
+                          customClass: { confirmButton: 'btn btn-primary' },
+                          html: <ListaModalExibir data={listaDataModal} />,
+                        });
                       }}
                     >Exibir</DropdownItem>
                     <DropdownItem
                       onClick={() => {
                         SwalModal.fire({
                           title: <h3>Expressão</h3>,
-                          confirmButtonText: 'Fechar',
                           buttonsStyling: false,
+                          confirmButtonText: 'Fechar',
+                          customClass: { confirmButton: 'btn btn-primary' },
                           html: <h6>{expressao}</h6>,
-                          customClass: {
-                            confirmButton: 'btn btn-primary',
-                          },
                         });
                       }}
                     >Expressão</DropdownItem>
@@ -169,127 +151,253 @@ export function HomePage() {
           <h1 className="w-100 text-center">Calculadora de Medidas</h1>
         </Col>
         <Col md={12} className="border-bottom border-top pb-3 pt-3">
-          <Formik
-            initialValues={valoresIniciais}
-            onSubmit={onSubmit}
-            validationSchema={schemaValidacao}
-          >
-            {({ touched, errors, values }) => (
-              <FormFormik>
-                <Row>
-                  <Campo type="text" name="nome" id="nome" value={values.nome}
-                    placeholder="Nome" errors={errors.nome} touched={touched.nome} />
-                  <Campo type="number" name="campoA" id="campoA" value={values.campoA}
-                    placeholder="Campo A" errors={errors.campoA} touched={touched.campoA} />
-                  <Campo type="number" name="campoB" id="campoB" value={values.campoB}
-                    placeholder="Campo B" errors={errors.campoB} touched={touched.campoB} />
-                  <Campo type="number" name="campoC" id="campoC" value={values.campoC}
-                    placeholder="Campo C" errors={errors.campoC} touched={touched.campoC} />
-                  <Col md={12} className="d-flex justify-content-end">
-                    <ButtonGroup>
-                      <Button type="submit" color="primary">Calcular</Button>
-                      <Button type="reset" color="danger" onClick={onReset}>Limpar</Button>
-                    </ButtonGroup>
-                  </Col>
-                </Row>
-              </FormFormik>
-            )}
-          </Formik>
+          <Formulario onSubmit={onSubmit} onReset={onReset} />
         </Col>
-        <Col md={12} className="mb-3 d-flex flex-column border-bottom pb-3 pt-3">
-          <h5 className="fw-bold">Resultado:</h5>
-          <h5>{dataResultadoExpressao}</h5>
+        <Col md={12} className="mb-3 border-bottom pb-3 pt-3">
+          <Resultado valor={dataResultadoExpressao} />
         </Col>
         <Col md={12}>
           <Row>
             <Col md={6} className="d-flex justify-content-between align-items-center flex-row">
-              <Form className="d-flex flex-row align-items-center" onSubmit={event => event.preventDefault()}>
-                <InputBuscaArea>
-                  <InputGroupText className="campo-busca-label">
-                    <Label for="filter_table" className="mb-0 me-2 fw-bold form-label">Pesquisar</Label>
-                    <FaSearch />
-                  </InputGroupText>
-                  <Input type="text" id="filter_table" value={value || ""} placeholder="Busca" className="campo-busca"
-                    onChange={event => {
-                      setValue(event.target.value);
-                      onChange(event.target.value);
-                    }} />
-                </InputBuscaArea>
-              </Form>
+              <CampoBuscaTabela
+                onChange={event => {
+                  setValue(event.target.value);
+                  onChange(event.target.value);
+                }}
+                value={value}
+              />
             </Col>
             <Col md={12}>
-              <Table {...getTableProps()} striped>
-                <thead>
-                  {headerGroups.map(headerGroup => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                      {headerGroup.headers.map(column => (
-                        <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                          {column.render('Header')}
-                          <span>{column.isSorted ? column.isSortedDesc ? <FaSortDown /> : <FaSortUp /> : ''}</span>
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody {...getTableBodyProps()}>
-                  {(page.length === 0) ? (
-                    <tr className="bg-light">
-                      <td colSpan={6} className="text-center h1 p-5 fw-bold">Lista Vazia</td>
-                    </tr>
-                  ) : (
-                    page.slice(0, pageSize).map((row, i) => {
-                      prepareRow(row);
-                      return (
-                        <tr {...row.getRowProps()}>
-                          {row.cells.map(cell => {
-                            return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                          })}
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </Table>
+              <TabelaMedidas getTableProps={getTableProps} headerGroups={headerGroups}
+                getTableBodyProps={getTableBodyProps} page={page} pageSize={pageSize} prepareRow={prepareRow} />
             </Col>
             {(page.length === 0) ? (null) : (
               <Col md={12} className="d-flex justify-content-end align-items-center flex-row mb-5">
-                <p className="me-3 mb-0">Pagina {pageIndex + 1} de {pageOptions.length}</p>
-                <PaginationEstilizado>
-                  <PaginationItem>
-                    <PaginationLink first onClick={() => gotoPage(0)} disabled={!canPreviousPage} />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink previous onClick={() => previousPage()} disabled={!canPreviousPage} />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink next onClick={() => nextPage()} disabled={!canNextPage} />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink last onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage} />
-                  </PaginationItem>
-                </PaginationEstilizado>
-                <div className="d-flex justify-content-end align-items-center flex-row ms-3">
-                  <p className="w-100 mb-0 me-2 text-end">Ir para a pagina</p>
-                  <Input className="rounded-pill text-center" type="number" defaultValue={pageIndex + 1}
-                    onChange={event => {
-                      const pagina = event.target.value ? Number(event.target.value) - 1 : 0
-                      gotoPage(pagina)
-                    }}
-                  />
-                </div>
-                <Form className="d-flex flex-row align-items-center ms-3" onSubmit={event => event.preventDefault()}>
-                  <Label for="page_select" className="mb-0 me-3 fw-bold form-label">Exibir</Label>
-                  <select className="form-select rounded-pill text-center" value={pageSize}
-                    onChange={event => { setPageSize(Number(event.target.value)) }}>
-                    {[10, 20, 30, 40, 50, 100].map((pageSize) => (<option value={pageSize} key={pageSize}>{pageSize}</option>))}
-                  </select>
-                </Form>
+                <ExibePaginaInicialFinal pageIndex={pageIndex} pageOptions={pageOptions} />
+                <PaginacaoLista gotoPage={gotoPage} canPreviousPage={canPreviousPage} previousPage={previousPage}
+                  nextPage={nextPage} canNextPage={canNextPage} pageCount={pageCount} />
+                <IrParaPaginaTabela pageIndex={pageIndex} gotoPage={gotoPage} />
+                <ExibirQuantidadeItensTabela pageSize={pageSize} setPageSize={setPageSize} />
               </Col>
             )}
           </Row>
         </Col>
       </Row>
     </Container>
+  );
+}
+
+interface ListaModalExibirDataTypes {
+  label: string;
+  valor: string;
+}
+
+interface ListaModalExibirProps {
+  data: ListaModalExibirDataTypes[];
+}
+
+function ListaModalExibir(props: ListaModalExibirProps) {
+  return (
+    <ListGroup>
+      {props.data.map((item, index) => {
+        return (
+          <ListGroupItem className="d-flex justify-content-between align-content-center flex-row" key={index}>
+            <span className="fw-bold">{item.label}</span>
+            <span>{item.valor}</span>
+          </ListGroupItem>
+        );
+      })}
+    </ListGroup>
+  );
+}
+
+interface TabelaMedidasProps {
+  getTableProps: (propGetter?: TablePropGetter<DataTypes> | undefined) => TableProps;
+  headerGroups: HeaderGroup<DataTypes>[];
+  getTableBodyProps: (propGetter?: TableBodyPropGetter<DataTypes> | undefined) => TableBodyProps;
+  page: RowReactTable<DataTypes>[];
+  pageSize: number;
+  prepareRow: (row: RowReactTable<DataTypes>) => void
+}
+
+export function TabelaMedidas(props: TabelaMedidasProps) {
+  return (
+    <Table {...props.getTableProps()} striped>
+      <thead>
+        {props.headerGroups.map(headerGroup => (
+          <tr {...headerGroup.getHeaderGroupProps()}>
+            {headerGroup.headers.map(column => (
+              <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                {column.render('Header')}
+                <span>{column.isSorted ? column.isSortedDesc ? <FaSortDown /> : <FaSortUp /> : ''}</span>
+              </th>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody {...props.getTableBodyProps()}>
+        {(props.page.length === 0) ? (
+          <tr className="bg-light">
+            <td colSpan={6} className="text-center h1 p-5 fw-bold">Lista Vazia</td>
+          </tr>
+        ) : (
+          props.page.slice(0, props.pageSize).map((row, i) => {
+            props.prepareRow(row);
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map(cell => {
+                  return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                })}
+              </tr>
+            )
+          })
+        )}
+      </tbody>
+    </Table>
+  );
+}
+
+interface PaginacaoListaProps {
+  gotoPage: (updater: number | ((pageIndex: number) => number)) => void;
+  previousPage: () => void;
+  nextPage: () => void;
+  canPreviousPage: boolean;
+  canNextPage: boolean;
+  pageCount: number;
+}
+
+export function PaginacaoLista(props: PaginacaoListaProps) {
+  return (
+    <PaginationEstilizado>
+      <PaginationItem>
+        <PaginationLink first onClick={() => props.gotoPage(0)} disabled={!props.canPreviousPage} />
+      </PaginationItem>
+      <PaginationItem>
+        <PaginationLink previous onClick={() => props.previousPage()} disabled={!props.canPreviousPage} />
+      </PaginationItem>
+      <PaginationItem>
+        <PaginationLink next onClick={() => props.nextPage()} disabled={!props.canNextPage} />
+      </PaginationItem>
+      <PaginationItem>
+        <PaginationLink last onClick={() => props.gotoPage(props.pageCount - 1)} disabled={!props.canNextPage} />
+      </PaginationItem>
+    </PaginationEstilizado>
+  );
+}
+
+interface ExibePaginaInicialFinalProps {
+  pageIndex: number;
+  pageOptions: number[];
+}
+
+export function ExibePaginaInicialFinal(props: ExibePaginaInicialFinalProps) {
+  return (
+    <p className="me-3 mb-0">Pagina {props.pageIndex + 1} de {props.pageOptions.length}</p>
+  );
+}
+
+interface ExibirQuantidadeItensTabelaProps {
+  pageSize: number;
+  setPageSize: (pageSize: number) => void;
+}
+
+export function ExibirQuantidadeItensTabela(props: ExibirQuantidadeItensTabelaProps) {
+  return (
+    <Form className="d-flex flex-row align-items-center ms-3" onSubmit={event => event.preventDefault()}>
+      <Label for="page_select" className="mb-0 me-3 fw-bold form-label">Exibir</Label>
+      <select className="form-select rounded-pill text-center" value={props.pageSize}
+        onChange={event => { props.setPageSize(Number(event.target.value)) }}>
+        {[5, 10, 20, 30, 40, 50, 100].map((pageSize) => (<option value={pageSize} key={pageSize}>{pageSize}</option>))}
+      </select>
+    </Form>
+  );
+}
+
+interface IrParaPaginaTabelaProps {
+  pageIndex: number;
+  gotoPage: (updater: number | ((pageIndex: number) => number)) => void;
+}
+
+export function IrParaPaginaTabela(props: IrParaPaginaTabelaProps) {
+  return (
+    <div className="d-flex justify-content-end align-items-center flex-row ms-3">
+      <p className="w-100 mb-0 me-2 text-end">Ir para a pagina</p>
+      <Input className="rounded-pill text-center" type="number" defaultValue={props.pageIndex + 1}
+        onChange={event => {
+          const pagina = event.target.value ? Number(event.target.value) - 1 : 0
+          props.gotoPage(pagina)
+        }}
+      />
+    </div>
+  );
+}
+
+interface CampoBuscaTabelaProps {
+  value: string | number | readonly string[];
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+}
+
+export function CampoBuscaTabela(props: CampoBuscaTabelaProps) {
+  return (
+    <Form className="d-flex flex-row align-items-center" onSubmit={event => event.preventDefault()}>
+      <InputBuscaArea>
+        <InputGroupText className="campo-busca-label">
+          <Label for="filter_table" className="mb-0 me-2 fw-bold form-label">Pesquisar</Label>
+          <FaSearch />
+        </InputGroupText>
+        <Input type="text" id="filter_table" value={props.value || ""} placeholder="Busca" className="campo-busca"
+          onChange={props.onChange} />
+      </InputBuscaArea>
+    </Form>
+  );
+}
+
+interface ResultadoProps {
+  valor: string | number;
+}
+
+export function Resultado(props: ResultadoProps) {
+  return (
+    <div className="d-flex flex-column">
+      <h5 className="fw-bold">Resultado:</h5>
+      <h5>{props.valor}</h5>
+    </div>
+  );
+}
+
+interface FormularioProps {
+  onSubmit: (values: FormTypes, formikHelpers: FormikHelpers<FormTypes>) => void;
+  onReset: () => void;
+}
+
+function Formulario(props: FormularioProps) {
+  return (
+    <Formik
+      initialValues={valoresIniciais}
+      onSubmit={props.onSubmit}
+      validationSchema={schemaValidacao}
+    >
+      {({ touched, errors, values }) => (
+        <FormFormik>
+          <Row>
+            <Campo type="text" name="nome" id="nome" value={values.nome}
+              placeholder="Nome" errors={errors.nome} touched={touched.nome} />
+            <Campo type="number" name="campoA" id="campoA" value={values.campoA}
+              placeholder="Campo A" errors={errors.campoA} touched={touched.campoA} />
+            <Campo type="number" name="campoB" id="campoB" value={values.campoB}
+              placeholder="Campo B" errors={errors.campoB} touched={touched.campoB} />
+            <Campo type="number" name="campoC" id="campoC" value={values.campoC}
+              placeholder="Campo C" errors={errors.campoC} touched={touched.campoC} />
+            <Col md={12} className="d-flex justify-content-end">
+              <ButtonGroup>
+                <Button type="submit" color="primary">Calcular</Button>
+                <Button type="reset" color="danger" onClick={props.onReset}>Limpar</Button>
+              </ButtonGroup>
+            </Col>
+          </Row>
+        </FormFormik>
+      )}
+    </Formik>
   );
 }
 
