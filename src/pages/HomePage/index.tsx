@@ -121,21 +121,21 @@ export function HomePage() {
     // { nome: 'Tiger', campo_a: 119, campo_b: 200, campo_c: 1, resultado: 2, expressao: 'Tiger -> 1 -> 1.68 -> 2' }
     let nome = values.nome;
     let resultado = calcula_medida({
-      campo_a: parseFloat(values.campoA),
-      campo_b: parseFloat(values.campoB),
-      campo_c: parseFloat(values.campoC)
+      campo_a: parseFloat(values.campo_a),
+      campo_b: parseFloat(values.campo_b),
+      campo_c: parseFloat(values.campo_c)
     });
-    let expressao = formatador_final({ nome, campo_b: parseFloat(values.campoB), resultado });
+    let expressao = formatador_final({ nome, campo_b: parseFloat(values.campo_b), resultado });
     setResultadoExpressao(expressao);
     setDataLista([...dataLista, {
       nome,
-      campo_a: values.campoA,
-      campo_b: values.campoB,
-      campo_c: values.campoC,
+      campo_a: values.campo_a,
+      campo_b: values.campo_b,
+      campo_c: values.campo_c,
       resultado: resultado.toFixed(2),
       expressao
     }]);
-    formikHelpers.setValues({ nome, campoA: values.campoA, campoB: '', campoC: values.campoC });
+    formikHelpers.setValues({ nome, campo_a: values.campo_a, campo_b: '', campo_c: values.campo_c });
   }
 
   function onReset() {
