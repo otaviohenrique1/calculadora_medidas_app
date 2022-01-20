@@ -158,13 +158,21 @@ export function HomePage() {
     <Container className="mb-5 mt-5">
       <Row>
         <Col md={12}>
-          <Titulo texto='Calculadora de Medidas' />
+          <Titulo
+            texto='Calculadora de Medidas'
+          />
         </Col>
         <Col md={12} className="border-bottom border-top pb-3 pt-3">
-          <Formulario onSubmit={onSubmit} onReset={onReset} abreAjuda={abreAjuda} />
+          <Formulario
+            onSubmit={onSubmit}
+            onReset={onReset}
+            abreAjuda={abreAjuda}
+          />
         </Col>
         <Col md={12} className="mb-3 border-bottom pb-3 pt-3">
-          <Resultado valor={dataResultadoExpressao} />
+          <Resultado
+            valor={dataResultadoExpressao}
+          />
         </Col>
         <Col md={12}>
           <Row>
@@ -178,16 +186,38 @@ export function HomePage() {
               />
             </Col>
             <Col md={12}>
-              <TabelaMedidas getTableProps={getTableProps} headerGroups={headerGroups} getTableBodyProps={getTableBodyProps}
-                page={page} pageSize={pageSize} prepareRow={prepareRow} colSpan={6} />
+              <TabelaMedidas
+                getTableProps={getTableProps}
+                headerGroups={headerGroups}
+                getTableBodyProps={getTableBodyProps}
+                page={page}
+                pageSize={pageSize}
+                prepareRow={prepareRow}
+                colSpan={6}
+              />
             </Col>
             {(page.length === 0) ? (null) : (
               <Col md={12} className="d-flex justify-content-end align-items-center flex-row mb-5">
-                <ExibePaginaInicialFinalTabela pageIndex={pageIndex} pageOptions={pageOptions} />
-                <PaginationTabela gotoPage={gotoPage} canPreviousPage={canPreviousPage} previousPage={previousPage}
-                  nextPage={nextPage} canNextPage={canNextPage} pageCount={pageCount} />
-                <IrParaPaginaTabela pageIndex={pageIndex} gotoPage={gotoPage} />
-                <ExibirQuantidadeItensTabela pageSize={pageSize} setPageSize={setPageSize} />
+                <ExibePaginaInicialFinalTabela
+                  pageIndex={pageIndex}
+                  pageOptions={pageOptions}
+                />
+                <PaginationTabela
+                  gotoPage={gotoPage}
+                  canPreviousPage={canPreviousPage}
+                  previousPage={previousPage}
+                  nextPage={nextPage}
+                  canNextPage={canNextPage}
+                  pageCount={pageCount}
+                />
+                <IrParaPaginaTabela
+                  pageIndex={pageIndex}
+                  gotoPage={gotoPage}
+                />
+                <ExibirQuantidadeItensTabela
+                  pageSize={pageSize}
+                  setPageSize={setPageSize}
+                />
               </Col>
             )}
           </Row>
